@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to ICO Converter | Fast Media Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070709;
+      --card-bg: #0f0f13;
+      --control-bg: #16161f;
+      --neon-cyan: #00f0ff;
+      --neon-purple: #bd00ff;
+      --neon-pink: #ff007a;
+      --text: #f3f4f6;
+      --text-muted: #6b7280;
+      --glass-border: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(189, 0, 255, 0.08) 0%, transparent 45%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 550px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed rgba(0, 240, 255, 0.2);
+      border-radius: 12px;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.03);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    }
+
+    .drop-icon {
+      font-size: 3rem;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    .drop-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .drop-text span {
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
+    .settings {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    select {
+      background: var(--control-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    select:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      color: #000;
+      border: none;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn:disabled {
+      background: #222;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .status {
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(255, 0, 122, 0.1);
+      border: 1px solid var(--neon-pink);
+      color: var(--neon-pink);
+    }
+
+    .status.loading {
+      display: block;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .file-info {
+      font-size: 0.85rem;
+      color: var(--neon-cyan);
+      font-weight: 600;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1>IMG to ICO Converter</h1>
+      <p>Быстрая конвертация изображений PNG/JPEG в иконки (.ico)</p>
+    </header>
+
+    <div class="panel">
+      <form id="convert-form">
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">💾</div>
+          <div class="drop-text" id="drop-prompt">
+            Перетащите файл сюда или <span>выберите на компьютере</span>
+          </div>
+          <div class="file-info" id="file-info"></div>
+          <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg">
+        </div>
+
+        <div class="settings" style="margin-top: 1.5rem;">
+          <label for="size">Размер иконки</label>
+          <select id="size">
+            <option value="all">Все размеры (16x16, 32x32, 48x48, 256x256)</option>
+            <option value="16">16 x 16 (Favicon)</option>
+            <option value="32">32 x 32 (Favicon HD)</option>
+            <option value="48">48 x 48 (Windows App)</option>
+            <option value="256">256 x 256 (High Quality)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn" id="submit-btn" style="width: 100%; margin-top: 1.5rem;" disabled>
+          Конвертировать
+        </button>
+      </form>
+
+      <div class="status" id="status-message"></div>
+    </div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const dropPrompt = document.getElementById('drop-prompt');
+    const fileInfo = document.getElementById('file-info');
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('convert-form');
+    const statusMsg = document.getElementById('status-message');
+
+    let selectedFile = null;
+
+    // Trigger click on file input
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag-and-drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length > 0) {
+        handleFileSelect(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    function handleFileSelect(file) {
+      if (!file.type.startsWith('image/')) {
+        showStatus('Ошибка: Файл должен быть изображением (PNG или JPEG)!', 'error');
+        selectedFile = null;
+        submitBtn.disabled = true;
+        fileInfo.style.display = 'none';
+        dropPrompt.style.display = 'block';
+        return;
+      }
+
+      selectedFile = file;
+      dropPrompt.style.display = 'none';
+      fileInfo.textContent = `Выбран файл: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      fileInfo.style.display = 'block';
+      submitBtn.disabled = false;
+      hideStatus();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedFile) return;
+
+      const size = document.getElementById('size').value;
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('size', size);
+
+      showStatus('Конвертация... Пожалуйста, подождите', 'loading');
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/convert', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Не удалось сконвертировать файл');
+        }
+
+        // Get file blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = selectedFile.name.split('.')[0] + '.ico';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showStatus('Успешно сконвертировано! Загрузка началась.', 'success');
+      } catch (err) {
+        showStatus(err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showStatus(text, type) {
+      statusMsg.textContent = text;
+      statusMsg.className = `status ${type}`;
+    }
+
+    function hideStatus() {
+      statusMsg.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
